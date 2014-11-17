@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Example Time Dilation</title>
+  <script language="javascript" src="js/dilation.js"></script>
+  <script language="javascript" src="js/gauge.min.js"></script>
+  <script language="javascript">
+  function calculate()
+  {
+    var sv = Number(document.getElementById("speed").value);
+    var sel = document.getElementById("speedUnits");
+    var su = sel.options[sel.selectedIndex].value;
+    var dayValue = Number(document.getElementById("days").value);
+    var hourValue = Number(document.getElementById("hours").value);
+    var minuteValue = Number(document.getElementById("minutes").value);
+    var secondValue = Number(document.getElementById("seconds").value);
+    var millisecondValue = Number(document.getElementById("milliseconds").value);
+
+    var speed = new Speed(sv, su);
+    var interval = new TimeInterval({
+      'days': dayValue,
+      'hours': hourValue,
+      'minutes': minuteValue,
+      'seconds': secondValue,
+      'milliseconds':millisecondValue
+    });
+
+    //setting the gauge
+    var hundredYear = new TimeInterval({'days':365 * 100, 'hours':6 * 100});
+    var gaugeValue = td.gainPerInterval(speed, hundredYear).totalMilliseconds();
+    document.getElementById("gaugeValue").innerHTML = gaugeValue;
+    if (gaugeValue != NaN && gaugeValue < 1500)
+    {
+      gauge.set(Math.log(gaugeValue+1) / Math.log(10) * 472);
+    }
+    else
+    {
+      gauge.set(1500);
+    }
+
+    //Setting the test
+    document.getElementById("ms").innerHTML = speed.ms;
+    document.getElementById("pc").innerHTML = speed.pc;
+    document.getElementById("timeDilationFactor").innerHTML = td.timeDilationFactor(speed);
+    document.getElementById("gainPerInterval").innerHTML = td.gainPerInterval(speed, interval).totalSeconds();
+    document.getElementById("percentageOfDilation").innerHTML = td.percentageOfDilation(speed, interval);
+  }
+  </script>
+</head>
+<body>
+  <label>Speed: </label>
+  <br />
+  <input type="text" id="speed" name="speed" onChange="calculate();"/>
+  <select type="text" id="speedUnits" name="speedUnits" onChange="calculate();">
+    <option value="m/s">m/s</option>
+    <option value="Km/s">Km/s</option>
+    <option value="Km/h">Km/h</option>
+    <option value="mph">mph</option>
+    <option value="pc">pc</option>
+  </select>
+  <br />
+  <br />
+  <label>Time interval: </label>
+  <br />
+  <label>Days: </label><input type="text" id="days" name="days" onChange="calculate();" />  <br />
+  <label>Hours: </label><input type="text" id="hours" name="hours" onChange="calculate();" />  <br />
+  <label>Minutes: </label><input type="text" id="minutes" name="minutes" onChange="calculate();" />  <br />
+  <label>Seconds: </label><input type="text" id="seconds" name="seconds" onChange="calculate();" />  <br />
+  <label>Milliseconds: </label><input type="text" id="milliseconds" name="milliseconds" onChange="calculate();" />  <br />
+
+  <h1>Time dilation values:</h1>
+  <label>Speed in % c:</label> <span id="pc"></span><br/>
+  <label>Speed in m/s: </label> <span id="ms"></span><br/>
+  <label>Dilation factor: </label> <span id="timeDilationFactor"></span><br/>
+  <label>Dilation gain: </label> <span id="gainPerInterval"></span><br/>
+  <label>Dilation percentage: </label> <span id="percentageOfDilation"></span><br/>
+
+  <div class="gauge">
+    <canvas id="Gauge"></canvas>
+    <label><span id="gaugeValue">0</span> milliseconds per 100 years</label>
+  </div>
+
+  <script language="javascript">
+    var opts = {
+      lines: 12, // The number of lines to draw
+      angle: 0, // The length of each line
+      lineWidth: 0.46, // The line thickness
+      pointer: {
+        length: 0.2, // The radius of the inner circle
+        strokeWidth: 0, // The rotation offset
+        color: '#000000' // Fill color
+      },
+      percentColors: [[0.0, "#a9d70b" ], [0.50, "#f9c802"], [1.0, "#ff0000"]],
+      limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
+      colorStart: '#6FADCF',   // Colors
+      colorStop: '#8FC0DA',    // just experiment with them
+      strokeColor: '#E0E0E0',
+      generateGradient: true
+    };
+    var target = document.getElementById('Gauge'); // your canvas element
+    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge.maxValue = 1500; // set max gauge value
+    gauge.animationSpeed = 32; // set animation speed (32 is default value)
+    gauge.set(0.1); // set actual value
+  </script>
+</body>
+</html>
